@@ -1,10 +1,13 @@
-use crate::{BusOperation, DelayNs, Error, PROPERTY_ENABLE, Lis2dux12};
+use super::super::{
+    BusOperation, DelayNs, Error, Lis2dux12, PROPERTY_ENABLE, RegisterOperation, SensorOperation,
+    bisync,
+    register::{BankState, MainBank},
+};
+
 use bitfield_struct::bitfield;
+
 use derive_more::TryFrom;
 use st_mem_bank_macro::register;
-
-
-
 
 /// Represents the register addresses of the device.
 ///
@@ -139,7 +142,7 @@ pub enum Reg {
 ///
 /// This register is a read-only register. Its value is fixed at 47h.
 /// Return the id of the device.
-#[register(address = Reg::WhoAmI, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::WhoAmI, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct WhoAmI {
@@ -155,7 +158,7 @@ pub struct WhoAmI {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::ExtClkCfg, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::ExtClkCfg, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct ExtClkCfg {
@@ -176,7 +179,7 @@ pub struct ExtClkCfg {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::PinCtrl, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::PinCtrl, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct PinCtrl {
@@ -236,7 +239,7 @@ pub struct PinCtrl {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::WakeUpDurExt, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::WakeUpDurExt, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct WakeUpDurExt {
@@ -260,7 +263,7 @@ pub struct WakeUpDurExt {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::Ctrl1, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::Ctrl1, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct Ctrl1 {
@@ -320,7 +323,7 @@ pub struct Ctrl1 {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::Ctrl2, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::Ctrl2, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct Ctrl2 {
@@ -358,7 +361,7 @@ pub struct Ctrl2 {
     pub int1_boot: u8,
 }
 
-#[register(address = Reg::Ctrl3, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::Ctrl3, access_type = "Lis2dux12<B, T, MainBank>")]
 /// Control Register 3 (R/W).
 ///
 /// The `CTRL3` register configures interrupt settings for the INT2 pin and self-test configurations.
@@ -425,7 +428,7 @@ pub struct Ctrl3 {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::Ctrl4, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::Ctrl4, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct Ctrl4 {
@@ -476,7 +479,7 @@ pub struct Ctrl4 {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::Ctrl5, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::Ctrl5, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct Ctrl5 {
@@ -506,7 +509,7 @@ pub struct Ctrl5 {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::FifoCtrl, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::FifoCtrl, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct FifoCtrl {
@@ -551,7 +554,7 @@ pub struct FifoCtrl {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::FifoWtm, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::FifoWtm, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct FifoWtm {
@@ -575,7 +578,7 @@ pub struct FifoWtm {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::InterruptCfg, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::InterruptCfg, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct InterruptCfg {
@@ -629,7 +632,7 @@ pub struct InterruptCfg {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::Sixd, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::Sixd, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct Sixd {
@@ -656,7 +659,7 @@ pub struct Sixd {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::WakeUpThs, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::WakeUpThs, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct WakeUpThs {
@@ -683,7 +686,7 @@ pub struct WakeUpThs {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::WakeUpDur, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::WakeUpDur, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct WakeUpDur {
@@ -719,7 +722,7 @@ pub struct WakeUpDur {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::FreeFall, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::FreeFall, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct FreeFall {
@@ -743,7 +746,7 @@ pub struct FreeFall {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::Md1Cfg, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::Md1Cfg, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct Md1Cfg {
@@ -800,7 +803,7 @@ pub struct Md1Cfg {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::Md2Cfg, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::Md2Cfg, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct Md2Cfg {
@@ -857,7 +860,7 @@ pub struct Md2Cfg {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::WakeUpSrc, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::WakeUpSrc, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct WakeUpSrc {
@@ -914,7 +917,7 @@ pub struct WakeUpSrc {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::TapSrc, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::TapSrc, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct TapSrc {
@@ -953,7 +956,7 @@ pub struct TapSrc {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::SixdSrc, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::SixdSrc, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct SixdSrc {
@@ -1010,7 +1013,7 @@ pub struct SixdSrc {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::AllIntSrc, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::AllIntSrc, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct AllIntSrc {
@@ -1067,7 +1070,7 @@ pub struct AllIntSrc {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::Status, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::Status, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct StatusRegister {
@@ -1097,7 +1100,7 @@ pub struct StatusRegister {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::FifoStatus1, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::FifoStatus1, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct FifoStatus1 {
@@ -1124,7 +1127,7 @@ pub struct FifoStatus1 {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::FifoStatus2, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::FifoStatus2, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct FifoStatus2 {
@@ -1142,7 +1145,7 @@ pub struct FifoStatus2 {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::OutXL, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::OutXL, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u16, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u16, order = Lsb))]
 pub struct OutX {
@@ -1158,7 +1161,7 @@ pub struct OutX {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::OutYL, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::OutYL, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u16, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u16, order = Lsb))]
 pub struct OutY {
@@ -1174,7 +1177,7 @@ pub struct OutY {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::OutZL, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::OutZL, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u16, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u16, order = Lsb))]
 pub struct OutZ {
@@ -1183,11 +1186,6 @@ pub struct OutZ {
     pub outz: u16,
 }
 
-
-
-
-
-
 /// Temperature Output Low Register (R).
 ///
 /// The `OUT_T_L` and `OUT_T_H` registers provides the bits of the temperature data output.
@@ -1195,7 +1193,7 @@ pub struct OutZ {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::OutTL, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::OutTL, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u16, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u16, order = Lsb))]
 pub struct OutT {
@@ -1204,9 +1202,6 @@ pub struct OutT {
     pub outt: u16,
 }
 
-
-
-
 /// Self-Test Register (R/W).
 ///
 /// The `SELF_TEST` register configures the self-test procedure and disables the temperature acquisition chain.
@@ -1214,7 +1209,7 @@ pub struct OutT {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::SelfTest, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::SelfTest, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct SelfTest {
@@ -1244,7 +1239,7 @@ pub struct SelfTest {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::I3cIfCtrl, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::I3cIfCtrl, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct I3cIfCtrl {
@@ -1280,7 +1275,7 @@ pub struct I3cIfCtrl {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::EmbFuncStatusMainpage, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::EmbFuncStatusMainpage, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct EmbFuncStatusMainpage {
@@ -1322,7 +1317,7 @@ pub struct EmbFuncStatusMainpage {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::FsmStatusMainpage, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::FsmStatusMainpage, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct FsmStatusMainpage {
@@ -1382,7 +1377,7 @@ pub struct FsmStatusMainpage {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::MlcStatusMainpage, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::MlcStatusMainpage, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct MlcStatusMainpage {
@@ -1421,7 +1416,7 @@ pub struct MlcStatusMainpage {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::Sleep, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::Sleep, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct Sleep {
@@ -1442,7 +1437,7 @@ pub struct Sleep {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::EnDeviceConfig, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::EnDeviceConfig, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct EnDeviceConfig {
@@ -1463,7 +1458,7 @@ pub struct EnDeviceConfig {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::FuncCfgAccess, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::FuncCfgAccess, access_type = "Lis2dux12<B, T, S>", multi_state = true)]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct FuncCfgAccess {
@@ -1490,7 +1485,7 @@ pub struct FuncCfgAccess {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::FifoDataOutTag, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::FifoDataOutTag, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct FifoDataOutTag {
@@ -1601,7 +1596,7 @@ pub struct FifoDataOutZH {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::FifoBatchDec, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::FifoBatchDec, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct FifoBatchDec {
@@ -1628,7 +1623,7 @@ pub struct FifoBatchDec {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::TapCfg0, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::TapCfg0, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct TapCfg0 {
@@ -1655,7 +1650,7 @@ pub struct TapCfg0 {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::TapCfg1, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::TapCfg1, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct TapCfg1 {
@@ -1679,7 +1674,7 @@ pub struct TapCfg1 {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::TapCfg2, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::TapCfg2, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct TapCfg2 {
@@ -1703,7 +1698,7 @@ pub struct TapCfg2 {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::TapCfg3, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::TapCfg3, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct TapCfg3 {
@@ -1727,7 +1722,7 @@ pub struct TapCfg3 {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::TapCfg4, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::TapCfg4, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct TapCfg4 {
@@ -1754,7 +1749,7 @@ pub struct TapCfg4 {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::TapCfg5, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::TapCfg5, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct TapCfg5 {
@@ -1790,7 +1785,7 @@ pub struct TapCfg5 {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::TapCfg6, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::TapCfg6, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct TapCfg6 {
@@ -1814,7 +1809,7 @@ pub struct TapCfg6 {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[register(address = Reg::Timestamp0, access_type = Lis2dux12, generics = 2)]
+#[register(address = Reg::Timestamp0, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u32, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u32, order = Lsb))]
 pub struct Timestamp {
@@ -1922,8 +1917,6 @@ pub struct XlData {
     pub mg: [f32; 3],
     pub raw: [i16; 3],
 }
-
-
 
 /// Represents the I3C configuration parameters.
 ///
@@ -2061,8 +2054,6 @@ pub struct IntConfig {
     pub sleep_status_on_int: u8,
     pub dis_rst_lir_all_int: u8,
 }
-
-
 
 /// Represents the configuration settings for the 4D/6D detection function.
 ///
@@ -2219,9 +2210,6 @@ pub struct Batch {
     pub bdr_xl: BdrXl,
 }
 
-
-
-
 /// Represents the processed FIFO data.
 ///
 /// # Fields
@@ -2292,9 +2280,6 @@ pub struct Pedo {
     pub steps: u32,
     pub timestamp: u32,
 }
-
-
-
 
 /// Represents configuration change data.
 ///
@@ -2369,12 +2354,6 @@ pub enum IntCfg {
     Level = 0x1,
     Latched = 0x2,
 }
-
-
-
-
-
-
 
 /// Represents the threshold options for 4D/6D detection.
 ///
@@ -2995,9 +2974,6 @@ pub enum SpiMode {
     Spi4Wire = 0x0,
     Spi3Wire = 0x1,
 }
-
-
-
 
 /// Represents the tags used in the FIFO sensor data.
 ///

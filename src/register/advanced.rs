@@ -1,10 +1,10 @@
-use crate::{BusOperation, DelayNs, Error, Lis2dux12};
+use super::super::{
+    BusOperation, DelayNs, EmbAdvFunctions, Error, Lis2dux12, RegisterOperation, bisync,
+    register::MainBank,
+};
+
 use bitfield_struct::bitfield;
 use st_mem_bank_macro::adv_register;
-use st_mems_bus::EmbAdvFunctions;
-
-
-
 
 /// Represents the register addresses for embedded advanced features page 0.
 ///
@@ -51,7 +51,7 @@ pub enum EmbAdvReg {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::FsmLcTimeoutL, access_type = Lis2dux12, generics = 2)]
+#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::FsmLcTimeoutL, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u16, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u16, order = Lsb))]
 pub struct FsmLcTimeout {
@@ -68,7 +68,7 @@ pub struct FsmLcTimeout {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::FsmPrograms, access_type = Lis2dux12, generics = 2)]
+#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::FsmPrograms, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct FsmPrograms {
@@ -88,7 +88,7 @@ pub struct FsmPrograms {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::FsmStartAddL, access_type = Lis2dux12, generics = 2)]
+#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::FsmStartAddL, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u16, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u16, order = Lsb))]
 pub struct FsmStartAdd {
@@ -104,7 +104,7 @@ pub struct FsmStartAdd {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::PedoCmdReg, access_type = Lis2dux12, generics = 2)]
+#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::PedoCmdReg, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct PedoCmdReg {
@@ -134,7 +134,7 @@ pub struct PedoCmdReg {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::PedoDebStepsConf, access_type = Lis2dux12, generics = 2)]
+#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::PedoDebStepsConf, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct PedoDebStepsConf {
@@ -153,7 +153,7 @@ pub struct PedoDebStepsConf {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::PedoScDeltatL, access_type = Lis2dux12, generics = 2)]
+#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::PedoScDeltatL, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u16, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u16, order = Lsb))]
 pub struct PedoScDeltat {
@@ -161,9 +161,6 @@ pub struct PedoScDeltat {
     #[bits(16)]
     pub pd_sc: u16,
 }
-
-
-
 
 /// Temperature sensor sensitivity low register (R/W).
 ///
@@ -173,7 +170,7 @@ pub struct PedoScDeltat {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::TSensitivityL, access_type = Lis2dux12, generics = 2)]
+#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::TSensitivityL, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u16, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u16, order = Lsb))]
 pub struct TSensitivity {
@@ -189,7 +186,7 @@ pub struct TSensitivity {
 /// The bit order for this struct can be configured using the `bit_order_msb` feature:
 /// * `Msb`: Most significant bit first.
 /// * `Lsb`: Least significant bit first (default).
-#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::SmartPowerCtrl, access_type = Lis2dux12, generics = 2)]
+#[adv_register(base_address = EmbAdvReg::EmbAdvPg0, address = EmbAdvReg::SmartPowerCtrl, access_type = "Lis2dux12<B, T, MainBank>")]
 #[cfg_attr(feature = "bit_order_msb", bitfield(u8, order = Msb))]
 #[cfg_attr(not(feature = "bit_order_msb"), bitfield(u8, order = Lsb))]
 pub struct SmartPowerCtrl {
