@@ -1765,11 +1765,6 @@ impl<B: BusOperation, T: DelayNs> Lis2dux12<B, T> {
     ///
     /// # Panics
     /// - Panics if `val >= 128` (assertion).
-    ///
-    /// # Example
-    /// ```rust
-    /// sensor.fifo_watermark_set(32)?;
-    /// ```
     pub fn fifo_watermark_set(&mut self, val: u8) -> Result<(), Error<B::Error>> {
         assert!(val < 128);
 
@@ -1789,11 +1784,6 @@ impl<B: BusOperation, T: DelayNs> Lis2dux12<B, T> {
     /// # Returns
     /// - `Ok(u8)`: The current FIFO watermark threshold (0..=127).
     /// - `Err`: If a bus or register access error occurs.
-    ///
-    /// # Example
-    /// ```rust
-    /// let wtm = sensor.fifo_watermark_get()?;
-    /// ```
     pub fn fifo_watermark_get(&mut self) -> Result<u8, Error<B::Error>> {
         FifoWtm::read(self).map(|reg| reg.fth())
     }
@@ -1814,12 +1804,6 @@ impl<B: BusOperation, T: DelayNs> Lis2dux12<B, T> {
     /// # Returns
     /// - `Ok(())` on success.
     /// - `Err`: If a bus or register access error occurs.
-    ///
-    /// # Example
-    /// ```rust
-    /// let batch = Batch { dec_ts: 1, bdr_xl: 2 };
-    /// sensor.fifo_batch_set(&batch)?;
-    /// ```
     pub fn fifo_batch_set(&mut self, val: &Batch) -> Result<(), Error<B::Error>> {
         let mut fifo_batch = FifoBatchDec::read(self)?;
 
@@ -1843,11 +1827,6 @@ impl<B: BusOperation, T: DelayNs> Lis2dux12<B, T> {
     /// # Returns
     /// - `Ok(Batch)`: Struct containing the current batching configuration.
     /// - `Err`: If a bus or register access error occurs.
-    ///
-    /// # Example
-    /// ```rust
-    /// let batch = sensor.fifo_batch_get()?;
-    /// ```
     pub fn fifo_batch_get(&mut self) -> Result<Batch, Error<B::Error>> {
         let reg = FifoBatchDec::read(self)?;
         Ok(Batch {
@@ -1871,11 +1850,6 @@ impl<B: BusOperation, T: DelayNs> Lis2dux12<B, T> {
     /// # Returns
     /// - `Ok(())` on success.
     /// - `Err`: If a bus or register access error occurs.
-    ///
-    /// # Example
-    /// ```rust
-    /// sensor.fifo_stop_on_wtm_set(FifoEvent::Enable)?;
-    /// ```
     pub fn fifo_stop_on_wtm_set(&mut self, fth: FifoEvent) -> Result<(), Error<B::Error>> {
         let mut fifo_ctrl = FifoCtrl::read(self)?;
         fifo_ctrl.set_stop_on_fth(fth as u8);
@@ -1893,11 +1867,6 @@ impl<B: BusOperation, T: DelayNs> Lis2dux12<B, T> {
     /// # Returns
     /// - `Ok(FifoEvent)`: Current stop-on-watermark configuration.
     /// - `Err`: If a bus or register access error occurs.
-    ///
-    /// # Example
-    /// ```rust
-    /// let stop_on_wtm = sensor.fifo_stop_on_wtm_get()?;
-    /// ```
     pub fn fifo_stop_on_wtm_get(&mut self) -> Result<FifoEvent, Error<B::Error>> {
         let ctrl = FifoCtrl::read(self)?;
         let evt = FifoEvent::try_from(ctrl.stop_on_fth()).unwrap_or_default();
