@@ -3,6 +3,9 @@ use bitfield_struct::bitfield;
 use st_mem_bank_macro::adv_register;
 use st_mems_bus::EmbAdvFunctions;
 
+
+
+
 /// Represents the register addresses for embedded advanced features page 0.
 ///
 /// These registers are accessible when `PAGE_SEL[3:0]` are set to `0000` in the `PAGE_SEL` register.
@@ -158,6 +161,9 @@ pub struct PedoScDeltat {
     #[bits(16)]
     pub pd_sc: u16,
 }
+
+
+
 
 /// Temperature sensor sensitivity low register (R/W).
 ///

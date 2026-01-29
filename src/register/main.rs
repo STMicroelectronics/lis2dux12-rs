@@ -1,7 +1,10 @@
-use crate::{BusOperation, DelayNs, Error, Lis2dux12, PROPERTY_ENABLE};
+use crate::{BusOperation, DelayNs, Error, PROPERTY_ENABLE, Lis2dux12};
 use bitfield_struct::bitfield;
 use derive_more::TryFrom;
 use st_mem_bank_macro::register;
+
+
+
 
 /// Represents the register addresses of the device.
 ///
@@ -1180,6 +1183,11 @@ pub struct OutZ {
     pub outz: u16,
 }
 
+
+
+
+
+
 /// Temperature Output Low Register (R).
 ///
 /// The `OUT_T_L` and `OUT_T_H` registers provides the bits of the temperature data output.
@@ -1195,6 +1203,9 @@ pub struct OutT {
     #[bits(16, access = RO)]
     pub outt: u16,
 }
+
+
+
 
 /// Self-Test Register (R/W).
 ///
@@ -1912,6 +1923,8 @@ pub struct XlData {
     pub raw: [i16; 3],
 }
 
+
+
 /// Represents the I3C configuration parameters.
 ///
 /// # Fields
@@ -2049,6 +2062,8 @@ pub struct IntConfig {
     pub dis_rst_lir_all_int: u8,
 }
 
+
+
 /// Represents the configuration settings for the 4D/6D detection function.
 ///
 /// # Fields
@@ -2081,7 +2096,7 @@ pub struct SixdConfig {
 ///
 /// This struct encapsulates the configuration settings for the wakeup function, allowing customization
 /// of wake duration, sleep duration, wake threshold, and inactivity ODR.
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct WakeupConfig {
     pub wake_dur: WakeDur,
     pub sleep_dur: u8,
@@ -2204,6 +2219,9 @@ pub struct Batch {
     pub bdr_xl: BdrXl,
 }
 
+
+
+
 /// Represents the processed FIFO data.
 ///
 /// # Fields
@@ -2274,6 +2292,9 @@ pub struct Pedo {
     pub steps: u32,
     pub timestamp: u32,
 }
+
+
+
 
 /// Represents configuration change data.
 ///
@@ -2348,6 +2369,12 @@ pub enum IntCfg {
     Level = 0x1,
     Latched = 0x2,
 }
+
+
+
+
+
+
 
 /// Represents the threshold options for 4D/6D detection.
 ///
@@ -2968,6 +2995,9 @@ pub enum SpiMode {
     Spi4Wire = 0x0,
     Spi3Wire = 0x1,
 }
+
+
+
 
 /// Represents the tags used in the FIFO sensor data.
 ///

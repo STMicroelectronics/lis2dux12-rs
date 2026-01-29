@@ -22,7 +22,7 @@ pub mod register;
 pub struct Lis2dux12<B: BusOperation, T: DelayNs> {
     pub bus: B,
     pub tim: T,
-    pub func_cfg_access_main: FuncCfgAccess,
+    pub func_cfg_access_main: FuncCfgAccess
 }
 
 /// Driver errors.
@@ -45,11 +45,7 @@ where
 {
     /// Constructor method using a generic Bus that implements BusOperation
     pub fn from_bus(bus: B, tim: T) -> Self {
-        Self {
-            bus,
-            tim,
-            func_cfg_access_main: FuncCfgAccess::new(),
-        }
+        Self { bus, tim, func_cfg_access_main: FuncCfgAccess::new() }
     }
 }
 
@@ -62,11 +58,7 @@ where
     pub fn new_i2c(i2c: P, address: I2CAddress, tim: T) -> Self {
         // Initialize the I2C bus with the Lis2dux12 address
         let bus = st_mems_bus::i2c::I2cBus::new(i2c, address as SevenBitAddress);
-        Self {
-            bus,
-            tim,
-            func_cfg_access_main: FuncCfgAccess::new(),
-        }
+        Self { bus, tim, func_cfg_access_main: FuncCfgAccess::new() }
     }
 }
 
@@ -79,11 +71,7 @@ where
     pub fn new_spi(spi: P, tim: T) -> Self {
         // Initialize the SPI bus
         let bus = st_mems_bus::spi::SpiBus::new(spi);
-        Self {
-            bus,
-            tim,
-            func_cfg_access_main: FuncCfgAccess::new(),
-        }
+        Self { bus, tim, func_cfg_access_main: FuncCfgAccess::new() }
     }
 }
 
@@ -145,8 +133,7 @@ where
             self.func_cfg_access_main
         };
 
-        let val = self
-            .func_cfg_access_main
+        let val = self.func_cfg_access_main
             .emb_func_reg_access()
             .try_into()
             .unwrap_or_default();
@@ -658,6 +645,11 @@ impl<B: BusOperation, T: DelayNs> Lis2dux12<B, T> {
         Ok(Md { odr, fs, bw })
     }
 
+    
+
+    
+
+    
     /// Disable/Enable temperature sensor acquisition.
     ///
     /// # Arguments
@@ -683,6 +675,7 @@ impl<B: BusOperation, T: DelayNs> Lis2dux12<B, T> {
         self_test.write(self)
     }
 
+    
     /// Disable/Enable temperature sensor acquisition.
     ///
     /// # Returns
@@ -724,6 +717,9 @@ impl<B: BusOperation, T: DelayNs> Lis2dux12<B, T> {
         sleep.write(self)
     }
 
+    
+
+    
     /// Enter soft power down in SPI case.
     ///
     /// # Returns
@@ -920,6 +916,9 @@ impl<B: BusOperation, T: DelayNs> Lis2dux12<B, T> {
         Ok(XlData { raw, mg })
     }
 
+    
+
+    
     /// Retrieves OUTT data.
     ///
     /// # Returns
@@ -944,6 +943,8 @@ impl<B: BusOperation, T: DelayNs> Lis2dux12<B, T> {
             heat: Heat { raw, deg_c },
         })
     }
+
+    
 
     /// Configures the self-test mode.
     ///
@@ -1182,7 +1183,7 @@ impl<B: BusOperation, T: DelayNs> Lis2dux12<B, T> {
             int2_pull_down: !pin_ctrl.pd_dis_int2() & 0x01,
             sda_pull_up: pin_ctrl.sda_pu_en() & 0x01,
             sdo_pull_up: pin_ctrl.sdo_pu_en() & 0x01,
-            int1_int2_push_pull: !pin_ctrl.pp_od() & 0x01,
+            int1_int2_push_pull: !pin_ctrl.pp_od()& 0x01,
         };
         Ok(pin_conf)
     }
@@ -1939,6 +1940,9 @@ impl<B: BusOperation, T: DelayNs> Lis2dux12<B, T> {
         Ok(buff)
     }
 
+    
+
+    
     /// Retrieves and processes FIFO data based on the sensor and FIFO mode configurations.
     ///
     /// # Arguments
@@ -2040,6 +2044,10 @@ impl<B: BusOperation, T: DelayNs> Lis2dux12<B, T> {
 
         Ok(data)
     }
+
+    
+
+    
 
     /// Sets the step counter mode.
     ///
@@ -3438,6 +3446,8 @@ pub fn from_fs16g_to_mg(lsb: i16) -> f32 {
 pub fn from_lsb_to_celsius(lsb: i16) -> f32 {
     (lsb as f32 / 355.5) + 25.0
 }
+
+
 
 /// Represents the I2C addresses for the sensor.
 ///
