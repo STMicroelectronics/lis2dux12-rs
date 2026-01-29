@@ -1914,7 +1914,7 @@ pub struct XlData {
 pub struct I3cCfg {
     pub bus_act_sel: BusActSel,
     pub asf_on: u8,
-    pub drstdaa_en: u8,
+    pub drstdaa_dis: u8,
 }
 
 /// Represents the electrical configuration for configurable pins.
