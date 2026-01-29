@@ -2677,8 +2677,8 @@ pub enum BdrXl {
 #[try_from(repr)]
 pub enum FifoEvent {
     #[default]
-    Wtm = 0x0,
-    Full = 0x1,
+    Wtm = 0x1,
+    Full = 0x0,
 }
 
 /// Represents the initialization modes for the device.
